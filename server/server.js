@@ -1,5 +1,9 @@
+/* eslint-disable  */
+
 var express = require('express');
 var bodyParser = require('body-parser');
+var path = require('path');
+
 var cors = require('cors');
 
 var app = express();
@@ -10,6 +14,13 @@ app.use(bodyParser.json());
 
 // cors support
 app.use(cors());
+
+// static file
+app.use(express.static(path.join(__dirname, '../app')));
+
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../app', 'index.html'));
+// });
 
 app.post('/api/auth/verifyUser', (req, res, next) => {
     console.log(req.body.domain, req.body.user, req.body.password)
@@ -51,3 +62,4 @@ const server = app.listen(port, () => {
     console.log(`API Server listening on port ${server.address().port}`);
 });
 
+/* eslint-enable  */
