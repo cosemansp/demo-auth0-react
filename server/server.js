@@ -21,7 +21,12 @@ app.post('/api/auth/verifyUser', (req, res, next) => {
             details: 'invalid password'
         })
     }
-    res.status(200).json({ status: 'ok'});
+    res.status(200).json({
+        user_id: 123,
+        name: 'peter cosemans',
+        email: req.body.user,
+        domain: req.body.domain
+    });
 })
 
 app.post('/api/auth/isUserRegistered', (req, res, next) => {
@@ -34,7 +39,12 @@ app.post('/api/auth/isUserRegistered', (req, res, next) => {
             details: 'only gmail is supported'
         })
     }
-    res.status(200).json({ status: 'ok'});
+    res.status(200).json({
+        user_id: 123,
+        name: 'peter cosemans',
+        email: req.body.email,
+        domain: 'myDomain'
+    });
 })
 
 const server = app.listen(port, () => {
