@@ -2,3 +2,9 @@ machine:
   node:
     version: 5.9.1
 
+deployment:
+  staging:
+    branch: master
+    heroku:
+      appname: pecoimmo
+
