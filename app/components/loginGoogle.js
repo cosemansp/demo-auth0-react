@@ -1,25 +1,32 @@
 import React from 'react';
 
-export class LoginGoogle extends React.Component {
+class LoginGoogle extends React.Component {
     constructor(props) {
         super(props);
         this.domainInput = '';
     }
 
-    onLoginGoogle(event) {
+    onLogin(event) {
         event.preventDefault();
         // this.loginGoogle(this.domainInput.value);
+        this.props.login({
+            domain: this.domainInput.value,
+        });
     }
 
     render() {
         return (
-            <form onSubmit={e => this.onLogin(e)}>
-                <input ref={node => { this.domainInput = node; }} placeholder="domain" />
-                <br/>
-                <button type="submit">
-                    Login Google
-                </button>
-            </form>
+            <div>
+                <form onSubmit={e => this.onLogin(e)}>
+                    <input ref={node => { this.domainInput = node; }} placeholder="domain" />
+                    <br/>
+                    <button type="submit">
+                        Login Google
+                    </button>
+                </form>
+            </div>
         );
     }
 }
+
+export default LoginGoogle;

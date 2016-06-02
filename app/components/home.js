@@ -1,139 +1,65 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-export class Home extends React.Component {
-    constructor(props) {
-        super(props);
+import LoginGoogle from './loginGoogle';
+import LoginPassw from './loginPassw';
+import { loginAuth0, logout } from '../actions';
 
-        // more info: https://auth0.com/docs/libraries/auth0js
-        this.auth0 = new Auth0({
-            domain: 'peco.eu.auth0.com',
-            clientID: 'cfi7J6zf7uknMjflLd38QizdvWdGPOF3',
-            callbackURL: 'http://localhost:8080',
-            callbackOnLocationHash: true,
-        });
+class Home extends React.Component {
 
-        this.state = {
-            profile: null,
-        };
-
-        this.domainInput = '';
-    }
-
-    showLock() {
-        // We receive lock from the parent component in this case
-        // If you instantiate it in this component, just do this.lock.show()
-        this.props.lock.show();
-    }
-
-    loginGoogle(domain) {
-        this.auth0.login({
-            connection: 'google-oauth2',
-            popup: true,
-            auto_login: false,
-            popupOptions: {
-                width: 450,
-                height: 800,
-            },
-            user_metadata: {
-                domain,
-            },
-            scope: 'openid email name domain',
-        }, this.signinCallback.bind(this));
-    }
-
-    loginPassword(domain, email, password) {
-        this.auth0.login({
-            // Don't display a popup to set an SSO cookie
-            sso: false,
-            auto_login: true,
-            connection: 'RestDB',
-            email,
-            password,
-            user_metadata: {
-                domain,
-            },
-            scope: 'openid email name domain',
-        }, this.signinCallback.bind(this));
-    }
-
-    signinCallback(err, profile, id_token, access_token, state) {
-        console.log('err', err);
-        console.log('profile', profile);
-        console.log('id_token', id_token);
-        console.log('access_token', access_token);
-        console.log('state', state);
-
-        if (err) {
-            alert('something went wrong: ' + err.message);
-            return;
-        }
-        localStorage.setItem('userToken', id_token);
-        this.setState({ profile });
-    }
-
-    logout() {
-        localStorage.removeItem('userToken');
-        this.setState({ profile: null });
-    }
-
-    onLoginGoogle(event) {
-        event.preventDefault();
-        console.log(this.domainInput.value);
-        this.loginGoogle(this.domainInput.value);
-    }
-
-    onLoginPassw(event) {
-        event.preventDefault();
-        console.log(this.domainPasswInput.value);
-        console.log(this.emailInput.value);
-        console.log(this.passwordInput.value);
-        this.loginPassword(
-            this.domainPasswInput.value,
-            this.emailInput.value,
-            this.passwordInput.value
-        );
-        this.passwordInput.value = '';
+    onLogin(type, event) {
+        this.props.login(type, event);
     }
 
     render() {
-        if (this.state.profile) {
+        if (this.props.auth.profile) {
             return (
                 <div>
-                    <h2>Welcome {this.state.profile.nickname}</h2>
-                    <pre>Profile {JSON.stringify(this.state.profile, null, "\t")}</pre>
-                    <button onClick={() => this.logout()}>Logout</button>
+                    <h2>Welcome {this.props.auth.profile.name}</h2>
+                    <pre>Profile:
+                     {JSON.stringify(this.props.auth.profile, null, '\t')}
+                    </pre>
+                    <hr />
+                    <button onClick={() => this.props.logout()}>Logout</button>
                 </div>
             );
         }
+
         return (
-            <div className="login-box">
-                <p>
-                    <a href="#" onClick={() => this.showLock()}>
-                        Sign In - Lock
-                    </a>
-                </p>
-                <form onSubmit={e => this.onLoginPassw(e)}>
-                    <input ref={node => { this.domainPasswInput = node; }} placeholder="domain" />
-                    <br/>
-                    <input ref={node => { this.emailInput = node; }} placeholder="email" />
-                    <br/>
-                    <input ref={node => { this.passwordInput = node; }} placeholder="password" />
-                    <br/>
-                    <button type="submit">
-                        Login user/password
-                    </button>
-                </form>
-                <br/>
-                <br/>
-                <form onSubmit={e => this.onLoginGoogle(e)}>
-                    <input ref={node => { this.domainInput = node; }} placeholder="domain"/>
-                    <br/>
-                    <button type="submit">
-                        Login Google
-                    </button>
-                </form>
+
+            <div>
+                <div className={this.props.auth.pending ? '' : 'hidden'}>
+                    Logging in...
+                    <hr />
+                </div>
+                <div className={this.props.auth.error ? 'alert' : 'hidden'}>
+                    !! {(this.props.auth.error) ? this.props.auth.error.message : ''} !!
+                </div>
+                You can login with any google account, <br /> but the domain must be 'myDomain'
+                <LoginGoogle login={(event) => this.onLogin('google', event)} />
+                <hr />
+                Use any domain and email, but its only valid with password=12345
+                <LoginPassw login={(event) => this.onLogin('passw', event)} />
             </div>
         );
     }
-
 }
+
+const mapStateToProps = (state) => {
+    return {
+        auth: state.auth,
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        login: (type, credentials) => dispatch(loginAuth0(type, credentials)),
+        logout: () => dispatch(logout()),
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Home);
+
