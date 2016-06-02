@@ -15,6 +15,8 @@ export class Home extends React.Component {
         this.state = {
             profile: null,
         };
+
+        this.domainInput = '';
     }
 
     showLock() {
@@ -23,7 +25,7 @@ export class Home extends React.Component {
         this.props.lock.show();
     }
 
-    loginGoogle() {
+    loginGoogle(domain) {
         this.auth0.login({
             connection: 'google-oauth2',
             popup: true,
@@ -33,22 +35,22 @@ export class Home extends React.Component {
                 height: 800,
             },
             user_metadata: {
-                domain: 'myDomain2',
+                domain,
             },
             scope: 'openid email name domain',
         }, this.signinCallback.bind(this));
     }
 
-    loginPassword() {
+    loginPassword(domain, email, password) {
         this.auth0.login({
             // Don't display a popup to set an SSO cookie
             sso: false,
             auto_login: true,
             connection: 'RestDB',
-            email: 'peter.cosemans@gmail.com',
-            password: '12345',
+            email,
+            password,
             user_metadata: {
-                domain: 'myDomain',
+                domain,
             },
             scope: 'openid email name domain',
         }, this.signinCallback.bind(this));
@@ -74,6 +76,25 @@ export class Home extends React.Component {
         this.setState({ profile: null });
     }
 
+    onLoginGoogle(event) {
+        event.preventDefault();
+        console.log(this.domainInput.value);
+        this.loginGoogle(this.domainInput.value);
+    }
+
+    onLoginPassw(event) {
+        event.preventDefault();
+        console.log(this.domainPasswInput.value);
+        console.log(this.emailInput.value);
+        console.log(this.passwordInput.value);
+        this.loginPassword(
+            this.domainPasswInput.value,
+            this.emailInput.value,
+            this.passwordInput.value
+        );
+        this.passwordInput.value = '';
+    }
+
     render() {
         if (this.state.profile) {
             return (
@@ -87,20 +108,30 @@ export class Home extends React.Component {
         return (
             <div className="login-box">
                 <p>
-                    <a href="#" onClick={() => this.showLock() }>
+                    <a href="#" onClick={() => this.showLock()}>
                         Sign In - Lock
                     </a>
                 </p>
-                <p>
-                    <a href="#" onClick={() => this.loginPassword() }>
-                        Sign In - user/passw
-                    </a>
-                </p>
-                <p>
-                    <a href="#" onClick={() => this.loginGoogle() }>
-                        Sign In - google
-                    </a>
-                </p>
+                <form onSubmit={e => this.onLoginPassw(e)}>
+                    <input ref={node => { this.domainPasswInput = node; }} placeholder="domain" />
+                    <br/>
+                    <input ref={node => { this.emailInput = node; }} placeholder="email" />
+                    <br/>
+                    <input ref={node => { this.passwordInput = node; }} placeholder="password" />
+                    <br/>
+                    <button type="submit">
+                        Login user/password
+                    </button>
+                </form>
+                <br/>
+                <br/>
+                <form onSubmit={e => this.onLoginGoogle(e)}>
+                    <input ref={node => { this.domainInput = node; }} placeholder="domain"/>
+                    <br/>
+                    <button type="submit">
+                        Login Google
+                    </button>
+                </form>
             </div>
         );
     }
