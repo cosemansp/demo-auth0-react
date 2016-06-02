@@ -34,7 +34,7 @@ app.post('/api/auth/verifyUser', (req, res, next) => {
     }
     res.status(200).json({
         user_id: 123,
-        name: 'peter cosemans',
+        name: 'Peter Cosemans',
         email: req.body.user,
         domain: req.body.domain
     });
@@ -42,17 +42,18 @@ app.post('/api/auth/verifyUser', (req, res, next) => {
 
 app.post('/api/auth/isUserRegistered', (req, res, next) => {
     console.log(req.body.email)
-    if (req.body.email.indexOf('gmail.com') == -1) {
+    console.log(req.body.domain)
+    if (req.body.domain !== 'myDomain') {
         return res.status(409).json({
             code: 409,
             error: 'conflict',
             status: 'nok',
-            details: 'only gmail is supported'
+            details: 'email is not registered on this domain'
         })
     }
     res.status(200).json({
         user_id: 123,
-        name: 'peter cosemans',
+        name: 'Peter Cosemans',
         email: req.body.email,
         domain: 'myDomain'
     });
